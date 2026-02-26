@@ -307,6 +307,9 @@ body.beige {
 #vis-panel {
   position: fixed; top: 120px; right: 36px; width: 220px;
   max-height: calc(100vh - 140px); overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   background: var(--panel-bg); backdrop-filter: blur(14px);
   border: 1px solid var(--border); border-radius: 3px;
   padding: 14px 16px 28px; z-index: 21; display: none;
@@ -371,6 +374,8 @@ body.beige {
 
 <button id="theme-btn" onclick="toggleTheme()">◐ Hell</button>
 <button id="vis-btn" onclick="toggleVisPanel()">⚙ Optik</button>
+<button onclick="exportState()" style="font-size:10px;padding:4px 8px">↓ Export</button>
+<label style="font-size:10px;padding:4px 8px;border:1px solid var(--border);border-radius:2px;cursor:pointer;color:var(--text-dim);background:var(--btn-bg)">↑ Import<input type="file" accept=".json" style="display:none" onchange="importState(this)"></label>
 <div id="vis-panel">
   <div class="vp-title">Visualisierung</div>
 
@@ -678,6 +683,30 @@ function adjustTitleSize() {
   const len = el.value.length || 1;
   const fs = Math.max(12, 22 - Math.max(0, len - 9) * 0.62);
   el.style.fontSize = fs.toFixed(1) + 'px';
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
+function exportState() {
+  visSave();
+  const raw = localStorage.getItem('todoPhysics_v4');
+  if (!raw) { alert('Nichts zum Exportieren.'); return; }
+  const blob = new Blob([raw], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'todoPhysics_export.json';
+  a.click();
+}
+function importState(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      JSON.parse(e.target.result); // validate
+      localStorage.setItem('todoPhysics_v4', e.target.result);
+      location.reload();
+    } catch { alert('Ungültige Datei.'); }
+  };
+  reader.readAsText(file);
 }
 
 // ─── PERSISTENCE ─────────────────────────────────────────────────────────────
