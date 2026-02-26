@@ -162,6 +162,19 @@ body.beige {
 }
 #theme-btn:hover { color: var(--text); }
 
+/* ── Sync buttons ────────────────────────────────────────── */
+#sync-bar {
+  position: fixed; bottom: 20px; right: 36px; z-index: 21;
+  display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+}
+#sync-bar button, #sync-bar label {
+  font-family: 'Syne Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text-dim); background: var(--btn-bg);
+  border: 1px solid var(--border); padding: 5px 11px; cursor: pointer;
+  border-radius: 2px; transition: all 0.18s; display: block;
+}
+#sync-bar button:hover, #sync-bar label:hover { color: var(--text); }
+
 /* ── Done panel ──────────────────────────────────────────── */
 #done-panel {
   position: fixed; top: 100px; right: 36px; width: 220px;
@@ -374,8 +387,10 @@ body.beige {
 
 <button id="theme-btn" onclick="toggleTheme()">◐ Hell</button>
 <button id="vis-btn" onclick="toggleVisPanel()">⚙ Optik</button>
-<button onclick="exportState()" style="font-size:10px;padding:4px 8px">↓ Export</button>
-<label style="font-size:10px;padding:4px 8px;border:1px solid var(--border);border-radius:2px;cursor:pointer;color:var(--text-dim);background:var(--btn-bg)">↑ Import<input type="file" accept=".json" style="display:none" onchange="importState(this)"></label>
+<div id="sync-bar">
+  <button onclick="exportState()">↓ Export</button>
+  <label>↑ Import<input type="file" accept=".json" style="display:none" onchange="importState(this)"></label>
+</div>
 <div id="vis-panel">
   <div class="vp-title">Visualisierung</div>
 
