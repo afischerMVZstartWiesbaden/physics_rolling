@@ -348,7 +348,13 @@ body.beige {
   font-family: 'Syne Mono', monospace; font-size: 8px; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--text-label);
   border-top: 1px solid var(--border); margin: 8px 0 6px; padding-top: 6px;
+  cursor: pointer; user-select: none;
+  display: flex; justify-content: space-between; align-items: center;
 }
+.vp-section::after { content: '▶'; font-size: 7px; opacity: 0.45; transition: transform 0.15s; }
+.vp-section.open::after { transform: rotate(90deg); }
+.vp-group { display: none; }
+.vp-group.open { display: block; }
 
 /* ── Palette swatches ────────────────────────────────────── */
 .vp-pal {
@@ -394,71 +400,81 @@ body.beige {
 <div id="vis-panel">
   <div class="vp-title">Visualisierung</div>
 
-  <div class="vp-section">Anzahl</div>
-  <div class="vp-row">
-    <label>Innen ↔ <span id="lbl-cnt-in-lat">5</span></label>
-    <input type="range" id="sl-cnt-in-lat" min="0" max="7" step="1" value="5"
-      oninput="visCntInLat=+this.value; document.getElementById('lbl-cnt-in-lat').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Innen ↕ <span id="lbl-cnt-in-lon">2</span></label>
-    <input type="range" id="sl-cnt-in-lon" min="0" max="5" step="1" value="2"
-      oninput="visCntInLon=+this.value; document.getElementById('lbl-cnt-in-lon').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>↕ Spreizung <span id="lbl-lon-spread">0.70</span></label>
-    <input type="range" id="sl-lon-spread" min="0.1" max="1.2" step="0.05" value="0.70"
-      oninput="visLonSpread=+this.value; document.getElementById('lbl-lon-spread').textContent=this.value.padEnd(4,'0')">
-  </div>
-  <div class="vp-row">
-    <label>Außen ↔ <span id="lbl-cnt-out-lat">2</span></label>
-    <input type="range" id="sl-cnt-out-lat" min="0" max="2" step="1" value="2"
-      oninput="visCntOutLat=+this.value; document.getElementById('lbl-cnt-out-lat').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Außen ↕ <span id="lbl-cnt-out-lon">3</span></label>
-    <input type="range" id="sl-cnt-out-lon" min="0" max="3" step="1" value="3"
-      oninput="visCntOutLon=+this.value; document.getElementById('lbl-cnt-out-lon').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Punkte Anzahl <span id="lbl-cnt-points">8</span></label>
-    <input type="range" id="sl-cnt-points" min="0" max="12" step="1" value="8"
-      oninput="visCntPoints=+this.value; document.getElementById('lbl-cnt-points').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Trail Länge <span id="lbl-trail-step">0.10</span></label>
-    <input type="range" id="sl-trail-step" min="0.02" max="0.25" step="0.01" value="0.10"
-      oninput="visTrailStep=+this.value; document.getElementById('lbl-trail-step').textContent=this.value.padStart(4,'0')">
-  </div>
-
-  <div class="vp-section">Helligkeit</div>
-  <div class="vp-row">
-    <label>Innen ↔ <span id="lbl-inner-lat">1.0</span></label>
-    <input type="range" id="sl-inner-lat" min="0" max="1.5" step="0.05" value="1.0"
-      oninput="visInnerLat=+this.value; document.getElementById('lbl-inner-lat').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Innen ↕ <span id="lbl-inner-lon">1.0</span></label>
-    <input type="range" id="sl-inner-lon" min="0" max="1.5" step="0.05" value="1.0"
-      oninput="visInnerLon=+this.value; document.getElementById('lbl-inner-lon').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Außen ↔ <span id="lbl-outer-lat">1.0</span></label>
-    <input type="range" id="sl-outer-lat" min="0" max="1.5" step="0.05" value="1.0"
-      oninput="visOuterLat=+this.value; document.getElementById('lbl-outer-lat').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Außen ↕ <span id="lbl-outer-lon">1.0</span></label>
-    <input type="range" id="sl-outer-lon" min="0" max="1.5" step="0.05" value="1.0"
-      oninput="visOuterLon=+this.value; document.getElementById('lbl-outer-lon').textContent=this.value">
-  </div>
-  <div class="vp-row">
-    <label>Punkte <span id="lbl-points">1.0</span></label>
-    <input type="range" id="sl-points" min="0" max="1.5" step="0.05" value="1.0"
-      oninput="visPoints=+this.value; document.getElementById('lbl-points').textContent=this.value">
+  <div class="vp-section open" onclick="toggleVpSection(this)">Anzahl</div>
+  <div class="vp-group open">
+    <div class="vp-row">
+      <label>Innen ↔ <span id="lbl-cnt-in-lat">5</span></label>
+      <input type="range" id="sl-cnt-in-lat" min="0" max="7" step="1" value="5"
+        oninput="visCntInLat=+this.value; document.getElementById('lbl-cnt-in-lat').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>↗ Rechts <span id="lbl-cnt-lon-r">1</span></label>
+      <input type="range" id="sl-cnt-lon-r" min="0" max="2" step="1" value="1"
+        oninput="visCntLonR=+this.value; document.getElementById('lbl-cnt-lon-r').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>↖ Links <span id="lbl-cnt-lon-l">1</span></label>
+      <input type="range" id="sl-cnt-lon-l" min="0" max="2" step="1" value="1"
+        oninput="visCntLonL=+this.value; document.getElementById('lbl-cnt-lon-l').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>↕ Winkel <span id="lbl-lon-spread">0.70</span></label>
+      <input type="range" id="sl-lon-spread" min="0.1" max="1.2" step="0.05" value="0.70"
+        oninput="visLonSpread=+this.value; document.getElementById('lbl-lon-spread').textContent=this.value.padEnd(4,'0')">
+    </div>
+    <div class="vp-row">
+      <label>Außen ↔ <span id="lbl-cnt-out-lat">2</span></label>
+      <input type="range" id="sl-cnt-out-lat" min="0" max="2" step="1" value="2"
+        oninput="visCntOutLat=+this.value; document.getElementById('lbl-cnt-out-lat').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Außen ↕ <span id="lbl-cnt-out-lon">3</span></label>
+      <input type="range" id="sl-cnt-out-lon" min="0" max="3" step="1" value="3"
+        oninput="visCntOutLon=+this.value; document.getElementById('lbl-cnt-out-lon').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Punkte Anzahl <span id="lbl-cnt-points">8</span></label>
+      <input type="range" id="sl-cnt-points" min="0" max="12" step="1" value="8"
+        oninput="visCntPoints=+this.value; document.getElementById('lbl-cnt-points').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Trail Länge <span id="lbl-trail-step">0.10</span></label>
+      <input type="range" id="sl-trail-step" min="0.02" max="0.25" step="0.01" value="0.10"
+        oninput="visTrailStep=+this.value; document.getElementById('lbl-trail-step').textContent=this.value.padStart(4,'0')">
+    </div>
   </div>
 
-  <div class="vp-section">3D Text</div>
+  <div class="vp-section" onclick="toggleVpSection(this)">Helligkeit</div>
+  <div class="vp-group">
+    <div class="vp-row">
+      <label>Innen ↔ <span id="lbl-inner-lat">1.0</span></label>
+      <input type="range" id="sl-inner-lat" min="0" max="1.5" step="0.05" value="1.0"
+        oninput="visInnerLat=+this.value; document.getElementById('lbl-inner-lat').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Innen ↕ <span id="lbl-inner-lon">1.0</span></label>
+      <input type="range" id="sl-inner-lon" min="0" max="1.5" step="0.05" value="1.0"
+        oninput="visInnerLon=+this.value; document.getElementById('lbl-inner-lon').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Außen ↔ <span id="lbl-outer-lat">1.0</span></label>
+      <input type="range" id="sl-outer-lat" min="0" max="1.5" step="0.05" value="1.0"
+        oninput="visOuterLat=+this.value; document.getElementById('lbl-outer-lat').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Außen ↕ <span id="lbl-outer-lon">1.0</span></label>
+      <input type="range" id="sl-outer-lon" min="0" max="1.5" step="0.05" value="1.0"
+        oninput="visOuterLon=+this.value; document.getElementById('lbl-outer-lon').textContent=this.value">
+    </div>
+    <div class="vp-row">
+      <label>Punkte <span id="lbl-points">1.0</span></label>
+      <input type="range" id="sl-points" min="0" max="1.5" step="0.05" value="1.0"
+        oninput="visPoints=+this.value; document.getElementById('lbl-points').textContent=this.value">
+    </div>
+  </div>
+
+  <div class="vp-section" onclick="toggleVpSection(this)">3D Text</div>
+  <div class="vp-group">
   <div class="vp-row">
     <label>Kontur <span id="lbl-3d-stroke">0.07</span></label>
     <input type="range" id="sl-3d-stroke" min="0" max="0.25" step="0.01" value="0.07"
@@ -504,7 +520,9 @@ body.beige {
     <input type="range" id="sl-3d-disc" min="0.02" max="0.60" step="0.01" value="0.20"
       oninput="vis3dDisc=+this.value; document.getElementById('lbl-3d-disc').textContent=this.value">
   </div>
-  <div class="vp-section">Sonstige</div>
+  </div>
+  <div class="vp-section" onclick="toggleVpSection(this)">Sonstige</div>
+  <div class="vp-group">
   <div class="vp-row">
     <label>Speed <span id="lbl-speed">1.0</span></label>
     <input type="range" id="sl-speed" min="0.05" max="1.5" step="0.05" value="1.0"
@@ -551,6 +569,7 @@ body.beige {
     <label style="margin-bottom:6px">Farben</label>
     <div style="display:flex;flex-wrap:wrap;gap:6px" id="pal-row"></div>
   </div>
+  </div>
   <div style="height:16px"></div>
 </div>
 
@@ -595,8 +614,9 @@ const { Engine, Bodies, Body, Composite, Events, Mouse, MouseConstraint } = Matt
 
 // ─── VIS SETTINGS ────────────────────────────────────────────────────────────
 let visCntInLat     = 5;    // Anzahl innen  Querschnitt (0-7)
-let visCntInLon     = 2;    // Anzahl innen  Längsschnitt (0-5)
-let visLonSpread    = 0.70; // Spreizung Längsschnitt-Winkel (0.1-1.2 rad)
+let visCntLonR      = 1;    // Rechts-gekippte Längsellipsen (0-2)
+let visCntLonL      = 1;    // Links-gekippte Längsellipsen (0-2)
+let visLonSpread    = 0.70; // Winkel Längsschnitt (0.1-1.2 rad)
 let visCntOutLat    = 2;    // Anzahl außen  Querschnitt (0-2)
 let visCntOutLon    = 3;    // Anzahl außen  Längsschnitt (0-3)
 let visCntPoints    = 8;    // Punkte Trail-Anzahl (0-12)
@@ -639,9 +659,17 @@ const visPresets = {
            ball:1.0, glow:1.0, base:1.0, bgDark:1.0 },
 };
 
+function toggleVpSection(el) {
+  const grp = el.nextElementSibling;
+  if (!grp || !grp.classList.contains('vp-group')) return;
+  const opening = !grp.classList.contains('open');
+  grp.classList.toggle('open', opening);
+  el.classList.toggle('open', opening);
+}
+
 function visSave() {
   visPresets[theme] = {
-    cntInLat:visCntInLat, cntInLon:visCntInLon, lonSpread:visLonSpread, cntOutLat:visCntOutLat, cntOutLon:visCntOutLon, cntPoints:visCntPoints, trailStep:visTrailStep,
+    cntInLat:visCntInLat, cntLonR:visCntLonR, cntLonL:visCntLonL, lonSpread:visLonSpread, cntOutLat:visCntOutLat, cntOutLon:visCntOutLon, cntPoints:visCntPoints, trailStep:visTrailStep,
     speed:visSpeed, innerLat:visInnerLat, innerLon:visInnerLon, outerLat:visOuterLat, outerLon:visOuterLon, points:visPoints,
     whiteLines:visWhiteLines, textBlack:visTextBlack, invert:visInvert,
     s3stroke:vis3dStroke, s3fill:vis3dFill, s3glow:vis3dGlow,
@@ -654,7 +682,8 @@ function visSave() {
 function visLoad(t) {
   const p = visPresets[t];
   visCntInLat    = p.cntInLat   ?? 5;
-  visCntInLon    = p.cntInLon   ?? 2;
+  visCntLonR     = p.cntLonR    ?? 1;
+  visCntLonL     = p.cntLonL    ?? 1;
   visLonSpread   = p.lonSpread  ?? 0.70;
   visCntOutLat   = p.cntOutLat  ?? 2;
   visCntOutLon   = p.cntOutLon  ?? 3;
@@ -685,7 +714,8 @@ function visLoad(t) {
   const sv = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
   const sl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   sv('sl-cnt-in-lat',  visCntInLat);   sl('lbl-cnt-in-lat',  visCntInLat);
-  sv('sl-cnt-in-lon',  visCntInLon);   sl('lbl-cnt-in-lon',  visCntInLon);
+  sv('sl-cnt-lon-r', visCntLonR); sl('lbl-cnt-lon-r', visCntLonR);
+  sv('sl-cnt-lon-l', visCntLonL); sl('lbl-cnt-lon-l', visCntLonL);
   sv('sl-lon-spread',  visLonSpread);  sl('lbl-lon-spread',  visLonSpread);
   sv('sl-cnt-out-lat', visCntOutLat);  sl('lbl-cnt-out-lat', visCntOutLat);
   sv('sl-cnt-out-lon', visCntOutLon);  sl('lbl-cnt-out-lon', visCntOutLon);
@@ -1165,7 +1195,7 @@ const world  = engine.world;
 
 function buildWalls() {
   return [
-    Bodies.rectangle(W/2, H + 25,  W + 200, 50, { isStatic: true, label: 'wall' }),
+    Bodies.rectangle(W/2, H - 51,  W + 200, 50, { isStatic: true, label: 'wall' }),
     Bodies.rectangle(-25, H/2,      50, H * 5,   { isStatic: true, label: 'wall' }),
     Bodies.rectangle(W + 25, H/2,   50, H * 5,   { isStatic: true, label: 'wall' }),
     // NO top wall — balls fly up and return via gravity
@@ -1304,7 +1334,7 @@ canvas.addEventListener('touchstart', e => {
       const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
       const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       Body.setStatic(sb.body, true);
-      Body.setPosition(sb.body, { x: mx, y: my });
+      Body.setPosition(sb.body, { x: mx, y: Math.min(my, H - 76 - sb.r) });
     } else {
       pinchStartR = null;
     }
@@ -1346,7 +1376,7 @@ canvas.addEventListener('touchmove', e => {
       // Ring buffer: keep last 120ms of positions for velocity averaging
       touchHistory.push({ x: t.clientX, y: t.clientY, t: now });
       if (touchHistory.length > 8) touchHistory.shift();
-      Body.setPosition(ball.body, { x: t.clientX, y: t.clientY });
+      Body.setPosition(ball.body, { x: t.clientX, y: Math.min(t.clientY, H - 76 - ball.r) });
     }
   }
   updateZones();
@@ -1876,15 +1906,14 @@ function drawBall(b, hovered, selected) {
     { rx: r*.76, ry: r*.13, rot: 0,             cy: y+r*.62, spd: .38 },
     { rx: r*.52, ry: r*.09, rot: 0,             cy: y-r*.82, spd: 1.80 },
     { rx: r*.52, ry: r*.09, rot: 0,             cy: y+r*.82, spd: .22 },
-    { rx: r*.17, ry: r*.97, rot:  visLonSpread*0.5,  cy: y,       spd: 1.65 }, // inner pair +
-    { rx: r*.17, ry: r*.97, rot: -visLonSpread*0.5,  cy: y,       spd: .42  }, // inner pair -
-    { rx: r*.17, ry: r*.97, rot:  visLonSpread,      cy: y,       spd: 1.10 }, // outer pair +
-    { rx: r*.17, ry: r*.97, rot: -visLonSpread,      cy: y,       spd: .78  }, // outer pair -
-    { rx: r*.17, ry: r*.97, rot:  0,                 cy: y,       spd: 1.38 }, // center
   ];
-  // ELPS[0-6] = latitude (↔), ELPS[7-11] = longitude (↕)
   const latSlice = ELPS.slice(0, Math.min(visCntInLat, 7));
-  const lonSlice = ELPS.slice(7, 7 + Math.min(visCntInLon, 5));
+  const lonSlice = [];
+  if (visCntLonR >= 1) lonSlice.push({ rx: r*.17, ry: r*.97, rot:  visLonSpread*0.5, cy: y, spd: 1.65 });
+  if (visCntLonR >= 2) lonSlice.push({ rx: r*.17, ry: r*.97, rot:  visLonSpread,     cy: y, spd: 1.10 });
+  if (visCntLonL >= 1) lonSlice.push({ rx: r*.17, ry: r*.97, rot: -visLonSpread*0.5, cy: y, spd: .42  });
+  if (visCntLonL >= 2) lonSlice.push({ rx: r*.17, ry: r*.97, rot: -visLonSpread,     cy: y, spd: .78  });
+  if (visCntLonR >= 2 && visCntLonL >= 2) lonSlice.push({ rx: r*.17, ry: r*.97, rot: 0, cy: y, spd: 1.38 });
   const innerElps = latSlice.map((e, i) => ({ e, i, isLon: false }))
     .concat(lonSlice.map((e, i) => ({ e, i: i + 7, isLon: true })));
 
