@@ -536,6 +536,11 @@ body.beige {
         onchange="visTextBlack=this.checked">
       <label for="cb-black-text" style="cursor:pointer;font-size:12px">Schrift schwarz</label>
     </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="cb-invert" style="width:16px;height:16px;cursor:pointer;accent-color:#aaa"
+        onchange="visInvert=this.checked">
+      <label for="cb-invert" style="cursor:pointer;font-size:12px">Grafik invertieren</label>
+    </div>
   </div>
   <div class="vp-row" style="margin-top:4px">
     <label style="margin-bottom:6px">Farben</label>
@@ -598,6 +603,7 @@ let visOuterLon     = 1.0;  // Linien außen  Längsschnitt
 let visPoints       = 1.0;  // Orbit-Punkte (Sparks)
 let visWhiteLines   = false; // alle Linien + Punkte auf Weiß
 let visTextBlack    = false; // Kugeltext auf Schwarz
+let visInvert       = false; // Alle Grafikelemente invertieren (außer Schrift)
 let vis3dStroke     = 0.07;  // Konturstärke (Faktor × fs)
 let vis3dFill       = 0.06;  // Innenfüllung (Opazität)
 let vis3dShadow     = 0.28;  // Schatten Stärke
@@ -631,7 +637,7 @@ function visSave() {
   visPresets[theme] = {
     cntInLat:visCntInLat, cntInLon:visCntInLon, cntOutLat:visCntOutLat, cntOutLon:visCntOutLon, cntPoints:visCntPoints, trailStep:visTrailStep,
     speed:visSpeed, innerLat:visInnerLat, innerLon:visInnerLon, outerLat:visOuterLat, outerLon:visOuterLon, points:visPoints,
-    whiteLines:visWhiteLines, textBlack:visTextBlack,
+    whiteLines:visWhiteLines, textBlack:visTextBlack, invert:visInvert,
     s3stroke:vis3dStroke, s3fill:vis3dFill, s3glow:vis3dGlow,
     s3shadow:vis3dShadow, s3sdist:vis3dShadowDist,
     s3lift:vis3dLift, s3arch:vis3dArch, s3tilt:vis3dTilt, s3disc:vis3dDisc,
@@ -655,6 +661,7 @@ function visLoad(t) {
   visPoints      = p.points     ?? 1.0;
   visWhiteLines  = p.whiteLines  ?? false;
   visTextBlack   = p.textBlack   ?? false;
+  visInvert      = p.invert      ?? false;
   vis3dStroke     = p.s3stroke ?? 0.07;
   vis3dFill       = p.s3fill   ?? 0.06;
   vis3dGlow       = p.s3glow   ?? 0.0;
@@ -688,6 +695,7 @@ function visLoad(t) {
   sv('sl-bgdark',      visBgDark);     sl('lbl-bgdark',      visBgDark);
   const cb = document.getElementById('cb-white-lines'); if (cb) cb.checked = visWhiteLines;
   const cb2 = document.getElementById('cb-black-text'); if (cb2) cb2.checked = visTextBlack;
+  const cb3 = document.getElementById('cb-invert');     if (cb3) cb3.checked = visInvert;
   sv('sl-3d-stroke', vis3dStroke);     sl('lbl-3d-stroke', vis3dStroke);
   sv('sl-3d-fill',   vis3dFill);       sl('lbl-3d-fill',   vis3dFill);
   sv('sl-3d-glow',   vis3dGlow);       sl('lbl-3d-glow',   vis3dGlow);
@@ -1803,12 +1811,15 @@ function drawBall(b, hovered, selected) {
         ? { r: Math.min(255,rc.r+160), g: Math.min(255,rc.g+160), b: Math.min(255,rc.b+155) }
         : { r: Math.max(0,rc.r-80),    g: Math.max(0,rc.g-80),    b: Math.max(0,rc.b-80) })
     : rc;
-  const drawLrc = visWhiteLines ? { r:255, g:255, b:255 } : lrc;
+  const inv = c => ({ r: 255-c.r, g: 255-c.g, b: 255-c.b });
+  const rawLrc = visWhiteLines ? { r:255, g:255, b:255 } : lrc;
+  const drawLrc = visInvert ? inv(rawLrc) : rawLrc;
   // Line color outside ball — contrast against background
   const orc = lightBg
     ? { r: Math.max(0,rc.r-30), g: Math.max(0,rc.g-30), b: Math.max(0,rc.b-30) }
     : rc;
-  const drawOrc = visWhiteLines ? { r:255, g:255, b:255 } : orc;
+  const rawOrc = visWhiteLines ? { r:255, g:255, b:255 } : orc;
+  const drawOrc = visInvert ? inv(rawOrc) : rawOrc;
 
   // 1. Hover/select glow (starts at edge, no fill inside)
   if (hovered || selected) {
