@@ -606,7 +606,7 @@ body.beige {
 <div id="hint">Links / Rechts raus = Erledigt · Doppelklick = Löschen · Nach oben werfen</div>
 
 <div id="add-bar">
-  <input id="add-input" type="text" placeholder="Neues Todo …" />
+  <input id="add-input" type="text" placeholder="Titel / Punkt 1 / Punkt 2 …" />
   <select id="prio-sel"></select>
   <button id="add-btn" onclick="addTodo()">+ Hinzufügen</button>
 </div>
@@ -1242,14 +1242,14 @@ function spawnBall(todo) {
 function addTodo() {
   const inp  = document.getElementById('add-input');
   const type = document.getElementById('prio-sel').value || 'workflow';
-  const text = inp.value.trim();
-  if (!text) return;
-  const words = text.split(' ');
-  const half  = Math.ceil(words.length / 2);
-  const disp  = words.length > 1
-    ? words.slice(0, half).join(' ') + '\n' + words.slice(half).join(' ')
-    : text;
-  spawnBall({ text: disp, type, id: nextId++ });
+  const raw  = inp.value.trim();
+  if (!raw) return;
+  // "Titel / Punkt 1 / Punkt 2" → "Titel\n- Punkt 1\n- Punkt 2"
+  const parts = raw.split(/\s*\/\s*/);
+  const text  = parts.length > 1
+    ? parts[0].trim() + '\n' + parts.slice(1).map(p => '- ' + p.trim()).join('\n')
+    : raw;
+  spawnBall({ text, type, id: nextId++ });
   inp.value = '';
   inp.focus();
   saveState();
@@ -1387,29 +1387,12 @@ canvas.addEventListener('touchmove', e => {
 canvas.addEventListener('touchend', e => {
   e.preventDefault();
   if (pinchStartDist !== null && e.touches.length < 2) {
-    const wasTwoFingerTap = Date.now() - pinchStartTime < 220;
-    const savedDist = pinchStartDist;
     pinchStartDist = null;
     pinchStartR    = null;
     if (selectedIdx >= 0 && balls[selectedIdx]) {
       const pb = balls[selectedIdx].body;
       Body.setStatic(pb, false);
       Body.setVelocity(pb, { x: 0, y: 0 });
-    }
-    // Two-finger tap = context menu (Kategorie / Sammlung)
-    if (wasTwoFingerTap) {
-      const tx = e.changedTouches[0].clientX, ty = e.changedTouches[0].clientY;
-      // Find ball under tap midpoint or use selectedIdx
-      let menuIdx = selectedIdx;
-      if (menuIdx < 0) {
-        for (let i = balls.length - 1; i >= 0; i--) {
-          const b = balls[i];
-          if (!b.visible) continue;
-          const dx = tx - b.body.position.x, dy = ty - b.body.position.y;
-          if (dx*dx + dy*dy < b.r*b.r*2) { menuIdx = i; break; }
-        }
-      }
-      if (menuIdx >= 0) showCtxMenu(menuIdx, tx, ty);
     }
     return;
   }
