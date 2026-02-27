@@ -1360,7 +1360,7 @@ canvas.addEventListener('touchend', e => {
           tooltip.classList.remove('show');
         } else {
           touchTipIdx = found;
-          tooltip.innerHTML  = lines.slice(1).join('<br>');
+          tooltip.innerHTML  = lines.join('<br>');
           tooltip.style.left = Math.min(tx + 14, window.innerWidth  - 220) + 'px';
           tooltip.style.top  = Math.min(ty - 10, window.innerHeight - 100) + 'px';
           tooltip.classList.add('show');
@@ -1608,7 +1608,7 @@ canvas.addEventListener('mousemove', e => {
     const lines = fb.data.text.split('\n');
     const isResting = (fb._wf ?? 0) > 0.38;
     if (isResting && lines.length > 1) {
-      tooltip.innerHTML  = lines.slice(1).join('<br>');
+      tooltip.innerHTML  = lines.join('<br>');
       tooltip.style.left = (e.clientX + 14) + 'px';
       tooltip.style.top  = (e.clientY - 10) + 'px';
       tooltip.classList.add('show');
