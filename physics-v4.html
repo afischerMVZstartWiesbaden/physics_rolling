@@ -1278,6 +1278,8 @@ canvas.addEventListener('touchstart', e => {
     if (dx*dx + dy*dy < b.r * b.r * 2.25) {
       dragState = { idx: i };
       Body.setStatic(b.body, true);   // freeze during drag → smooth follow
+      touchTipIdx = -1;
+      tooltip.classList.remove('show');
       break;
     }
   }
@@ -1347,6 +1349,30 @@ canvas.addEventListener('touchend', e => {
       if (dx*dx + dy*dy < b.r * b.r * 1.8) { found = i; break; }
     }
     selectedIdx = found === selectedIdx ? -1 : found;
+    // Tooltip: show on tap of resting ball with extra lines, hide otherwise
+    if (found >= 0) {
+      const fb    = balls[found];
+      const lines = fb.data.text.split('\n');
+      const isResting = (fb._wf ?? 0) > 0.38;
+      if (isResting && lines.length > 1) {
+        if (touchTipIdx === found) {
+          touchTipIdx = -1;
+          tooltip.classList.remove('show');
+        } else {
+          touchTipIdx = found;
+          tooltip.innerHTML  = lines.slice(1).join('<br>');
+          tooltip.style.left = Math.min(tx + 14, window.innerWidth  - 220) + 'px';
+          tooltip.style.top  = Math.min(ty - 10, window.innerHeight - 100) + 'px';
+          tooltip.classList.add('show');
+        }
+      } else {
+        touchTipIdx = -1;
+        tooltip.classList.remove('show');
+      }
+    } else {
+      touchTipIdx = -1;
+      tooltip.classList.remove('show');
+    }
   } else {
     checkDoneRelease();
   }
@@ -1562,7 +1588,8 @@ canvas.addEventListener('dblclick', e => {
 });
 
 // ─── HOVER + SELECT ───────────────────────────────────────────────────────────
-let hoveredIdx  = -1;
+let hoveredIdx     = -1;
+let touchTipIdx    = -1;
 let selectedIdx = -1;
 const tooltip   = document.getElementById('tooltip');
 
@@ -1577,10 +1604,17 @@ canvas.addEventListener('mousemove', e => {
   hoveredIdx = found;
   canvas.style.cursor = found >= 0 ? 'pointer' : 'default';
   if (found >= 0) {
-    tooltip.textContent = balls[found].data.text.replace('\n', ' ');
-    tooltip.style.left = (e.clientX + 14) + 'px';
-    tooltip.style.top  = (e.clientY - 10) + 'px';
-    tooltip.classList.add('show');
+    const fb    = balls[found];
+    const lines = fb.data.text.split('\n');
+    const isResting = (fb._wf ?? 0) > 0.38;
+    if (isResting && lines.length > 1) {
+      tooltip.innerHTML  = lines.slice(1).join('<br>');
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 10) + 'px';
+      tooltip.classList.add('show');
+    } else {
+      tooltip.classList.remove('show');
+    }
   } else {
     tooltip.classList.remove('show');
   }
@@ -1925,24 +1959,21 @@ function drawBall(b, hovered, selected) {
   ctx.textBaseline = 'middle';
   ctx.fillStyle    = textCol;
 
-  // For wrap: use longest line only (multiline text stays readable)
+  // Only show first line on ball; extra lines go to tooltip
   const allLines  = b.data.text.split('\n');
-  const wrapLine  = allLines.reduce((a, l) => l.length > a.length ? l : a, '');
-  const charWs    = wrapLine.split('').map(ch => ctx.measureText(ch).width);
+  const ballLine  = allLines[0];
+  const charWs    = ballLine.split('').map(ch => ctx.measureText(ch).width);
   const totalW    = charWs.reduce((a, w) => a + w, 0);
   // Only wrap if text fits reasonably — fall back to flat for very long text on small balls
   const canWrap   = wf > 0.38 && totalW < r * 2.8;
 
   if (!canWrap) {
-    // Flat
-    const lh    = fs * 1.28;
-    const maxTW = r * 1.65;
-    allLines.forEach((line, li) =>
-      ctx.fillText(line, x, y + (li - (allLines.length-1)/2) * lh, maxTW));
+    // Flat — single line only
+    ctx.fillText(ballLine, x, y, r * 1.65);
   } else {
     // Text stands upright ON the ELPS[0] disc — appears to float inside the sphere
     const spread   = (wf - 0.38) / 0.62;
-    const chars    = wrapLine.split('');
+    const chars    = ballLine.split('');
     const eRx      = r * 0.97;   // ELPS[0] rx  — disc width
     const eRy      = r * 0.19;   // ELPS[0] ry  — disc foreshortening
     const discAR   = eRy / eRx;  // ≈ 0.196 — shadow squish ratio
