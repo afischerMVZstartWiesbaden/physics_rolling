@@ -1266,12 +1266,22 @@ canvas.addEventListener('touchstart', e => {
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     pinchStartDist = Math.hypot(dx, dy);
-    pinchStartR    = selectedIdx >= 0 && balls[selectedIdx] ? balls[selectedIdx].r : null;
     // Unfreeze any dragged ball before switching to pinch
     const db = getDragBall();
     if (db) Body.setStatic(db.body, false);
     dragState    = null;
     touchHistory = [];
+    if (selectedIdx >= 0 && balls[selectedIdx]) {
+      const sb = balls[selectedIdx];
+      pinchStartR = sb.r;
+      // Freeze immediately at finger midpoint so ball doesn't drift
+      const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      Body.setStatic(sb.body, true);
+      Body.setPosition(sb.body, { x: mx, y: my });
+    } else {
+      pinchStartR = null;
+    }
     return;
   }
   const t = e.touches[0];
@@ -1744,7 +1754,7 @@ function speedEllipse(cx, cy, rx, ry, rot, lineRc, baseAlpha, phaseShift) {
 
 // Moving spark: glow halo + bright core + long fading trail
 function ellipseSpark(cx, cy, rx, ry, rot, sparkT, lineRc, scale = 1.0) {
-  if (scale <= 0.01) return;
+  if (scale <= 0.01 || visCntPoints <= 0) return;
   const col = `rgba(${lineRc.r},${lineRc.g},${lineRc.b},`;
   const p   = ellipseP(cx, cy, rx, ry, rot, sparkT);
   const g   = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 4);
