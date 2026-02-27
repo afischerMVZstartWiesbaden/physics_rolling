@@ -1320,6 +1320,7 @@ let touchStartPos  = null;
 let touchStartTime = 0;
 let pinchStartDist = null;
 let pinchStartR    = null;
+let pinchStartTime = 0;
 let touchHistory   = [];   // [{x,y,t}] ring buffer for throw velocity
 
 canvas.addEventListener('touchstart', e => {
@@ -1328,6 +1329,7 @@ canvas.addEventListener('touchstart', e => {
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     pinchStartDist = Math.hypot(dx, dy);
+    pinchStartTime = Date.now();
     // Keep ball frozen — no unfreeze, no teleport (avoids physics-tick jitter)
     dragState    = null;
     touchHistory = [];
@@ -1385,12 +1387,29 @@ canvas.addEventListener('touchmove', e => {
 canvas.addEventListener('touchend', e => {
   e.preventDefault();
   if (pinchStartDist !== null && e.touches.length < 2) {
+    const wasTwoFingerTap = Date.now() - pinchStartTime < 220;
+    const savedDist = pinchStartDist;
     pinchStartDist = null;
     pinchStartR    = null;
     if (selectedIdx >= 0 && balls[selectedIdx]) {
       const pb = balls[selectedIdx].body;
       Body.setStatic(pb, false);
-      Body.setVelocity(pb, { x: 0, y: 0 });  // no throw after pinch — falls naturally
+      Body.setVelocity(pb, { x: 0, y: 0 });
+    }
+    // Two-finger tap = context menu (Kategorie / Sammlung)
+    if (wasTwoFingerTap) {
+      const tx = e.changedTouches[0].clientX, ty = e.changedTouches[0].clientY;
+      // Find ball under tap midpoint or use selectedIdx
+      let menuIdx = selectedIdx;
+      if (menuIdx < 0) {
+        for (let i = balls.length - 1; i >= 0; i--) {
+          const b = balls[i];
+          if (!b.visible) continue;
+          const dx = tx - b.body.position.x, dy = ty - b.body.position.y;
+          if (dx*dx + dy*dy < b.r*b.r*2) { menuIdx = i; break; }
+        }
+      }
+      if (menuIdx >= 0) showCtxMenu(menuIdx, tx, ty);
     }
     return;
   }
