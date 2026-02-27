@@ -164,7 +164,7 @@ body.beige {
 
 /* ── Sync buttons ────────────────────────────────────────── */
 #sync-bar {
-  position: fixed; bottom: 20px; right: 36px; z-index: 21;
+  position: fixed; bottom: 84px; right: 36px; z-index: 23;
   display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
 }
 #sync-bar button, #sync-bar label {
@@ -2038,12 +2038,6 @@ function drawBall(b, hovered, selected) {
     ctx.textBaseline = 'middle';
   }
 
-  // 12. Node dot
-  ctx.beginPath(); ctx.arc(x+r*0.63, y-r*0.63, 3.2, 0, Math.PI*2);
-  ctx.fillStyle = `rgba(${drawLrc.r},${drawLrc.g},${drawLrc.b},0.72)`; ctx.fill();
-  ctx.beginPath(); ctx.arc(x+r*0.63, y-r*0.63, 5.2, 0, Math.PI*2);
-  ctx.strokeStyle = `rgba(${drawLrc.r},${drawLrc.g},${drawLrc.b},0.25)`;
-  ctx.lineWidth = 1; ctx.stroke();
 }
 
 // ─── DRAW FRAME ───────────────────────────────────────────────────────────────
